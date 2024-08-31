@@ -45,6 +45,7 @@ function Test-CommandExists {
     $exists = $null -ne (Get-Command $command -ErrorAction SilentlyContinue)
     return $exists
 }
+
 # Editor Configuration
 $EDITOR = if (Test-CommandExists nvim) { 'nvim' }
           elseif (Test-CommandExists pvim) { 'pvim' }
@@ -79,7 +80,6 @@ function admin {
         Start-Process wt -Verb runAs
     }
 }
-# Set UNIX-like aliases for the admin command, so sudo <command> will run the command with elevated rights.
 Set-Alias -Name su -Value admin
 function uptime {
     if ($PSVersionTable.PSVersion.Major -eq 5) {
@@ -195,132 +195,142 @@ Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock $scriptblock
 function sudo{
     start-process powershell -verb runas   
 }
+function Spotify-install{
+    git clone https://github.com/HimadriChakra12/Spotold.git
+    cd Spotold
+    Write-Host "Welcome to the Spotify Installer!" -ForegroundColor Cyan
+    # Prompt for package manager selection
+    Write-Host "Please choose the UI(version) manager:" -ForegroundColor Yellow
+    Write-Host "[O] - Old"
+    Write-Host "[N] - New"
+    Write-Host " "
+    $choice = Read-Host Enter the version of your choice:
+    Write-Host " "
+    switch ($choice) {
+        O {
+            start-process Install_Old_theme.bat
+        }
+        N {
+            start-process Install_New_theme.bat
+        }
+        default {
+            Write-Host "Invalid choice." -ForegroundColor Red
+        }
+    }
+    }
 function wi ($file){winget install $file}
 function ch ($file){choco install $file}
 function sc ($file){scoop install $file}
-function wtf?{
-    $path = rg --files --no-filename | fzf
-    $files = Get-ChildItem -Path $path | select-Object FullName | fzf
-    Start-Process $path
-}
-function wtd? {
-    # Get a list of directories
-    $directories = Get-ChildItem -Directory -Recurse | Select-Object FullName
-    # Use fzf to select a directory
-    $selectedDirectory = $directories | fzf
-    # Open the selected directory
-    explorer $selectedDirectory
-}
+function fast{ fastfetch }
 function d{cd d:}
 function c{cd c:}
 function uwu{ls | fzf}
 function b{cd ..}
+function wtf?{
+    $path = rg --files --no-filename | fzf
+    $files = Get-ChildItem -Path $path | select-Object FullName | fzf
+    Start-Process $path
+    }
+function wtd? {
+    $directories = Get-ChildItem -Directory -Recurse | Select-Object FullName
+    $selectedDirectory = $directories | fzf
+    explorer $selectedDirectory
+    }
 function omg {
     set-Location "D:\Games\The shortcuts"
     $path = rg --files --no-filename | fzf
     Start-Process $path
-}
+    }
+function installers{
+    start-process powershell -verb runas  
+    Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
+    Run Get-ExecutionPolicy. If it returns Restricted, then run Set-ExecutionPolicy AllSigned or Set-ExecutionPolicy Bypass -Scope Process
+    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+    }
 function posh-kid{
    winget install JanDeDobbeleer.OhMyPosh -s winget
    oh-my-posh font install meslo
    oh-my-posh get shell
    notepad $PROFILE
    oh-my-posh init pwsh | Invoke-Expression
-}
-function anti-posh{
-    winget uninstall JanDeDobbeleer.OhMyPosh
-}
+    }
+function Bye-posh{
+    winget uninstall JanDeDobbeleer.OhMyPosh }
 function Track {
-$url1 = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt"
-Invoke-WebRequest -Uri $url1 -OutFile "D:\Random\Trackers\BasicTracker.txt"
-$url2 = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ip.txt" 
-Invoke-WebRequest -Uri $url2 -OutFile "D:\Random\Trackers\DNSTrackers.txt"
-$url3 = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best_ip.txt" 
-Invoke-WebRequest -Uri $url3 -OutFile "D:\Random\Trackers\DNSTrackers-best.txt"
-$url4 = "https://cf.trackerslist.com/best.txt" 
-Invoke-WebRequest -Uri $url4 -OutFile "D:\Random\Trackers\CFTrackers-best.txt"
-$url5 = "https://cf.trackerslist.com/all.txt" 
-Invoke-WebRequest -Uri $url5 -OutFile "D:\Random\Trackers\CFTrackers-All.txt"
-$url6 = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt" 
-Invoke-WebRequest -Uri $url6 -OutFile "D:\Random\Trackers\BasicTracker-best.txt"
-start-process "D:\Random\Trackers\BasicTracker.txt"
-start-process "D:\Random\Trackers\DNSTrackers.txt"
-start-process "D:\Random\Trackers\DNSTrackers-best.txt"
-start-process "D:\Random\Trackers\CFTrackers-best.txt"
-start-process "D:\Random\Trackers\CFTrackers-All.txt"
-start-process "D:\Random\Trackers\BasicTracker-best.txt"
-}
+    $url1 = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt"
+    Invoke-WebRequest -Uri $url1 -OutFile "D:\Random\Trackers\BasicTracker.txt"
+    $url2 = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ip.txt" 
+    Invoke-WebRequest -Uri $url2 -OutFile "D:\Random\Trackers\DNSTrackers.txt"
+    $url3 = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best_ip.txt" 
+    Invoke-WebRequest -Uri $url3 -OutFile "D:\Random\Trackers\DNSTrackers-best.txt"
+    $url4 = "https://cf.trackerslist.com/best.txt" 
+    Invoke-WebRequest -Uri $url4 -OutFile "D:\Random\Trackers\CFTrackers-best.txt"
+    $url5 = "https://cf.trackerslist.com/all.txt" 
+    Invoke-WebRequest -Uri $url5 -OutFile "D:\Random\Trackers\CFTrackers-All.txt"
+    $url6 = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt" 
+    Invoke-WebRequest -Uri $url6 -OutFile "D:\Random\Trackers\BasicTracker-best.txt"
+    start-process "D:\Random\Trackers\BasicTracker.txt"
+    start-process "D:\Random\Trackers\DNSTrackers.txt"
+    start-process "D:\Random\Trackers\DNSTrackers-best.txt"
+    start-process "D:\Random\Trackers\CFTrackers-best.txt"
+    start-process "D:\Random\Trackers\CFTrackers-All.txt"
+    start-process "D:\Random\Trackers\BasicTracker-best.txt" }
 function rot ($url){
     $Filename = Read-Host "Save the file with the name of"
     Invoke-WebRequest -Uri $url -OutFile "D:\Random\Trackers\$Filename.txt" 
-}
-
+    }
 function tf?{
-$selected_item = $(rg --files --no-filename | fzf)
-if ($selected_item) {
+    $selected_item = $(rg --files --no-filename | fzf)
+    if ($selected_item) {
     $selected_item.FullName | Set-Clipboard
     Write-Host "Path copied to clipboard: $($selected_item.FullName)"
-} else {
+    } else {
     Write-Host "No item selected."
-}
-}
-function prevzf{
-     fzf --preview "cat '{}'"
-}
-function holy{
+    }}
+function td? {
     $directories = Get-ChildItem -Directory -Recurse | Select-Object -ExpandProperty FullName | Where-Object { $_.Substring(2) } | Where-Object { Test-Path $_ -PathType Container -ErrorAction Ignore }
     $selectedDirectory = $directories | fzf
-    cd $selectedDirectory
-}
+    cd $selectedDirectory 
+    }
 function Commander {
     $command= Get-Command | fzf
     if ($command -eq "exit") {break}
     Invoke-Expression $command
     }
 function czf{
-$start_directory = Read-Host "Enter the starting directory:"
-$files = Get-ChildItem $start_directory -File
-$selected_file = $files | ConvertTo-Json | fzf | ConvertFrom-Json
-if ($selected_file) {
+    $start_directory = Read-Host "Enter the starting directory:"
+    $files = Get-ChildItem $start_directory -File
+    $selected_file = $files | ConvertTo-Json | fzf | ConvertFrom-Json
+    if ($selected_file) {
     $destination = Read-Host "Enter the destination path:"
     Copy-Item $selected_file.FullName $destination
     Write-Host "File copied successfully!"
-} else {
+    }
+    else {
     Write-Host "No file selected."
-}
-}
+    } 
+    }
 function ytdlm ($url){
     $Filename = Read-Host "Name of the song"
-    D:\Foobar2032\yt-dlp_win\yt-dlp.exe -f bestaudio --extract-audio --audio-format opus --audio-quality 0 -o "D:\Musics\$Filename.opus" $url
-}
+    D:\Foobar2032\yt-dlp_win\yt-dlp.exe -f bestaudio --extract-audio --audio-format opus --audio-quality 0 -o "D:\Musics\$Filename.opus" $url 
+    }
 function ytdlp ($url){
     $Filename = Read-Host "Name of the Playlist"
-    D:\Foobar2032\yt-dlp_win\yt-dlp.exe -f bestaudio --extract-audio --audio-format opus --audio-quality 0 -o "D:\Musics\" $url
-}
-function manzan ($data){
-    set-location "D:\Manzana-Apple-Music-Downloader"
-    python manzana.py $data
-}
-function fast{
-    fastfetch
-}
+    D:\Foobar2032\yt-dlp_win\yt-dlp.exe -f bestaudio --extract-audio --audio-format opus --audio-quality 0 -o "D:\Musics\" $url 
+    }
 function npm-install{
     winget install Schniz.fnm
-fnm env --use-on-cd | Out-String | Invoke-Expression
-fnm use --install-if-missing 20
-node -v 
-npm -v
-}
+    fnm env --use-on-cd | Out-String | Invoke-Expression
+    fnm use --install-if-missing 20
+    node -v 
+    npm -v
+    }
 function spf-install{
-    powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/install.ps1'))"
-}
-$ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-if (Test-Path($ChocolateyProfile)) {
-  Import-Module "$ChocolateyProfile"
-}
+    powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/install.ps1'))" 
+    }
 function real-stuffs{
     winget install aria2 fzf nvim
-}
+    }
 function pkg ($SoftwareName) {
     Write-Host "Welcome to the Software Installer!" -ForegroundColor Cyan
     # Prompt for package manager selection
@@ -348,10 +358,15 @@ function pkg ($SoftwareName) {
             Write-Host "Invalid choice." -ForegroundColor Red
         }
     }
-}
+    }
 function search ($appname) {
     winget search --query $appname | fzf
-}
+    }
+# Choco
+    $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+    if (Test-Path($ChocolateyProfile)) {
+    Import-Module "$ChocolateyProfile"
+    }
 # Help Function
 function Show-Help {
     @"
