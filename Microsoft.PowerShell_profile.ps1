@@ -16,8 +16,7 @@ function Update-PowerShell {
         $latestVersion = $latestReleaseInfo.tag_name.Trim('v')
         if ($currentVersion -lt $latestVersion) {
             $updateNeeded = $true
-        }
-
+        }   
         if ($updateNeeded) {
             Write-Host "Updating PowerShell..." -ForegroundColor Yellow
             winget upgrade "Microsoft.PowerShell" --accept-source-agreements --accept-package-agreements
@@ -30,6 +29,93 @@ function Update-PowerShell {
     }
 }
 Update-PowerShell
+# Help Function
+function Show-Help {
+    @"
+PowerShell Profile Help
+=======================
+
+Update-Profile - Checks for profile updates from a remote repository and updates if necessary.
+
+Update-PowerShell - Checks for the latest PowerShell release and updates if a new version is available.
+
+Edit-Profile - Opens the current user's profile for editing using the configured editor.
+
+touch <file> - Creates a new empty file.
+
+ff <name> - Finds files recursively with the specified name.
+
+Get-PubIP - Retrieves the public IP address of the machine.
+
+winutil - Runs the WinUtil script from Chris Titus Tech.
+
+uptime - Displays the system uptime.
+
+reload - Reloads the current user's PowerShell.
+
+unzip <file> - Extracts a zip file to the current directory.
+
+hb <file> - Uploads the specified file's content to a hastebin-like service and returns the URL.
+
+grep <regex> [dir] - Searches for a regex pattern in files within the specified directory or from the pipeline input.
+
+df - Displays information about volumes.
+
+sed <file> <find> <replace> - Replaces text in a file.
+
+which <name> - Shows the path of the command.
+
+export <name> <value> - Sets an environment variable.
+
+pkill <name> - Kills processes by name.
+
+pgrep <name> - Lists processes by name.
+
+head <path> [n] - Displays the first n lines of a file (default 10).
+
+tail <path> [n] - Displays the last n lines of a file (default 10).
+
+nf <name> - Creates a new file with the specified name.
+
+mkcd <dir> - Creates and changes to a new directory.
+
+docs - Changes the current directory to the user's Documents folder.
+
+dtop - Changes the current directory to the user's Desktop folder.
+
+ep - Opens the profile for editing.
+
+k9 <name> - Kills a process by name.
+
+la - Lists all files in the current directory with detailed formatting.
+
+ll - Lists all files, including hidden, in the current directory with detailed formatting.
+
+gs - Shortcut for 'git status'.
+
+ga - Shortcut for 'git add .'.
+
+gc <message> - Shortcut for 'git commit -m'.
+
+gp - Shortcut for 'git push'.
+
+g - Changes to the GitHub directory.
+
+gcom <message> - Adds all changes and commits with the specified message.
+
+lazyg <message> - Adds all changes, commits with the specified message, and pushes to the remote repository.
+
+sysinfo - Displays detailed system information.
+
+flushdns - Clears the DNS cache.
+
+cpy <text> - Copies the specified text to the clipboard.
+
+pst - Retrieves text from the clipboard.
+
+Use 'Show-Help' to display this help message.
+"@
+}
 # Admin Check and Prompt Customization
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 function prompt {
@@ -47,7 +133,8 @@ function Test-CommandExists {
 }
 
 # Editor Configuration
-$EDITOR = if (Test-CommandExists nvim) { 'nvim' }
+$EDITOR = if (Test-CommandExists nano) {'nano'}
+          elseif (Test-CommandExists nvim) { 'nvim' }
           elseif (Test-CommandExists pvim) { 'pvim' }
           elseif (Test-CommandExists vim) { 'vim' }
           elseif (Test-CommandExists vi) { 'vi' }
@@ -57,7 +144,7 @@ $EDITOR = if (Test-CommandExists nvim) { 'nvim' }
           else { 'notepad' }
 Set-Alias -Name vim -Value $EDITOR
 function Edit-Profile {
-    vim $PROFILE.CurrentUserAllHosts
+    explorer "C:\Users\Himadri\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1"
 }
 function touch($file) { "" | Out-File $file -Encoding ASCII }
 function ff($name) {
@@ -80,7 +167,6 @@ function admin {
         Start-Process wt -Verb runAs
     }
 }
-Set-Alias -Name su -Value admin
 function uptime {
     if ($PSVersionTable.PSVersion.Major -eq 5) {
         Get-WmiObject win32_operatingsystem | Select-Object @{Name='LastBootUpTime'; Expression={$_.ConverttoDateTime($_.lastbootuptime)}} | Format-Table -HideTableHeaders
@@ -192,7 +278,7 @@ $scriptblock = {
         }
 }
 Register-ArgumentCompleter -Native -CommandName dotnet -ScriptBlock $scriptblock
-function sudo{
+function su {
     start-process powershell -verb runas   
 }
 function Spotify-install{
@@ -217,35 +303,32 @@ function Spotify-install{
             Write-Host "Invalid choice." -ForegroundColor Red
         }
     }
-    }
+}
+function zf{
+    fzf --height 60% --layout reverse --border 
+}
 function wi ($file){winget install $file}
 function ch ($file){choco install $file}
 function sc ($file){scoop install $file}
 function fast{ fastfetch }
 function d{cd d:}
 function c{cd c:}
-function uwu{ls | fzf}
+function uwu{ls | fzf --height 60% --layout reverse --border }
 function b{cd ..}
 function wtf?{
-    $path = rg --files --no-filename | fzf
-    $files = Get-ChildItem -Path $path | select-Object FullName | fzf
+    $path = rg --files --no-filename | fzf --height 60% --layout reverse --border
+    $files = Get-ChildItem -Path $path | select-Object FullName | fzf --height 60% --layout reverse --border
     Start-Process $path
     }
 function wtd? {
     $directories = Get-ChildItem -Directory -Recurse | Select-Object FullName
-    $selectedDirectory = $directories | fzf
+    $selectedDirectory = $directories | fzf --height 60% --layout reverse --border --height 60% --layout reverse --border
     explorer $selectedDirectory
     }
 function omg {
     set-Location "D:\Games\The shortcuts"
-    $path = rg --files --no-filename | fzf
+    $path = rg --files --no-filename | fzf --height 60% --layout reverse --border
     Start-Process $path
-    }
-function installers{
-    start-process powershell -verb runas  
-    Add-AppxPackage -RegisterByFamilyName -MainPackage Microsoft.DesktopAppInstaller_8wekyb3d8bbwe
-    Run Get-ExecutionPolicy. If it returns Restricted, then run Set-ExecutionPolicy AllSigned or Set-ExecutionPolicy Bypass -Scope Process
-    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
     }
 function posh-kid{
    winget install JanDeDobbeleer.OhMyPosh -s winget
@@ -255,7 +338,7 @@ function posh-kid{
    oh-my-posh init pwsh | Invoke-Expression
     }
 function Bye-posh{
-    winget uninstall JanDeDobbeleer.OhMyPosh }
+    winget uninstall JanDeDobbeleer.OhMyPosh}
 function Track {
     $url1 = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all.txt"
     Invoke-WebRequest -Uri $url1 -OutFile "D:\Random\Trackers\BasicTracker.txt"
@@ -280,7 +363,7 @@ function rot ($url){
     Invoke-WebRequest -Uri $url -OutFile "D:\Random\Trackers\$Filename.txt" 
     }
 function tf?{
-    $selected_item = $(rg --files --no-filename | fzf)
+    $selected_item = $(rg --files --no-filename | fzf --height 60% --layout reverse --border)
     if ($selected_item) {
     $selected_item.FullName | Set-Clipboard
     Write-Host "Path copied to clipboard: $($selected_item.FullName)"
@@ -289,11 +372,11 @@ function tf?{
     }}
 function td? {
     $directories = Get-ChildItem -Directory -Recurse | Select-Object -ExpandProperty FullName | Where-Object { $_.Substring(2) } | Where-Object { Test-Path $_ -PathType Container -ErrorAction Ignore }
-    $selectedDirectory = $directories | fzf
+    $selectedDirectory = $directories | fzf --height 60% --layout reverse --border
     cd $selectedDirectory 
     }
 function Commander {
-    $command= Get-Command | fzf
+    $command= Get-Command | fzf --height 60% --layout reverse --border
     if ($command -eq "exit") {break}
     Invoke-Expression $command
     }
@@ -310,20 +393,23 @@ function czf{
     Write-Host "No file selected."
     } 
     }
+    function Soundcloud{
+        cd "D:\BetterSoundCloud"
+        npm start
+    }
 function ytdlm ($url){
     $Filename = Read-Host "Name of the song"
-    D:\Foobar2032\yt-dlp_win\yt-dlp.exe -f bestaudio --extract-audio --audio-format opus --audio-quality 0 -o "D:\Musics\$Filename.opus" $url 
+    D:\Foobar2032\yt-dlp_win\yt-dlp.exe -f bestaudio --extract-audio --audio-format flac --audio-quality 0 -o "D:\Musics\$Filename.flac" $url 
+    D:\Foobar2032\yt-dlp_win\yt-dlp.exe -f bestaudio --extract-audio --audio-format opus --audio-quality 0 -o "D:\Musics\$Filename.opus" $url
+    explorer "D:\Musics"
     }
+function ytdlno{
+    $Filename = Read-Host "Name of the song"
+    D:\Foobar2032\yt-dlp_win\yt-dlp.exe -f bestaudio --extract-audio --audio-quality 0 -o "D:\Musics\$Filename.mp3" $url 
+}
 function ytdlp ($url){
     $Filename = Read-Host "Name of the Playlist"
     D:\Foobar2032\yt-dlp_win\yt-dlp.exe -f bestaudio --extract-audio --audio-format opus --audio-quality 0 -o "D:\Musics\" $url 
-    }
-function npm-install{
-    winget install Schniz.fnm
-    fnm env --use-on-cd | Out-String | Invoke-Expression
-    fnm use --install-if-missing 20
-    node -v 
-    npm -v
     }
 function spf-install{
     powershell -ExecutionPolicy Bypass -Command "Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://superfile.netlify.app/install.ps1'))" 
@@ -331,6 +417,68 @@ function spf-install{
 function real-stuffs{
     winget install aria2 fzf nvim
     }
+
+function crack-office{
+    Write-Host "Check both folder Please choose a package manager:" -ForegroundColor Yellow
+    explorer "C:\Program Files"
+    explorer "C:\Program Files(x86)"
+    Write-Host "[PF] - Program Files"
+    Write-Host "[PF86] - Program Files(x86)"
+    Write-Host " "
+    $choice = Read-Host Enter the your choice:
+    Write-Host " "
+    switch ($choice) {
+    PF {
+        cd /d %ProgramFiles%\Microsoft Office\Office16
+        invoke-Expression "for /f %x in ('dir /b ..\root\Licenses16\proplusvl_kms*.xrm-ms') do cscript ospp.vbs /inslic:"..\root\Licenses16\%x""
+        cscript ospp.vbs /inpkey:XQNVK-8JYDB-WJ9W3-YJ8YR-WFG99
+        cscript ospp.vbs /unpkey:BTDRB >nul
+        cscript ospp.vbs /unpkey:KHGM9 >nul
+        cscript ospp.vbs /unpkey:CPQVG >nul
+        cscript ospp.vbs /sethst:107.175.77.7
+        cscript ospp.vbs /setprt:1688
+        cscript ospp.vbs /act
+        }
+    PF86 {
+        cd /d %ProgramFiles(x86)%\Microsoft Office\Office16
+        invoke-Expression "for /f %x in ('dir /b ..\root\Licenses16\proplusvl_kms*.xrm-ms') do cscript ospp.vbs /inslic:"..\root\Licenses16\%x""
+        cscript ospp.vbs /inpkey:XQNVK-8JYDB-WJ9W3-YJ8YR-WFG99
+        cscript ospp.vbs /unpkey:BTDRB >nul
+        cscript ospp.vbs /unpkey:KHGM9 >nul
+        cscript ospp.vbs /unpkey:CPQVG >nul
+        cscript ospp.vbs /sethst:107.175.77.7
+        cscript ospp.vbs /setprt:1688
+        cscript ospp.vbs /act
+        }
+    default {
+        Write-Host "Failed to crack" -ForegroundColor Red
+        }
+    }
+}
+function spot ($url){
+    cd D:\Musics
+    $env:SPOTIPY_CLIENT_ID='e5e6bc45381e4bcd9640974043fab7a5'
+    $env:SPOTIPY_CLIENT_SECRET='cae56005226d4c948600f9f4c2e38206'
+     spotify_dl -l $url
+}
+function searchapp ($appname) {
+    winget search --query $appname
+    choco search --query $appname
+    }
+# Choco
+    $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+    if (Test-Path($ChocolateyProfile)) {
+    Import-Module "$ChocolateyProfile"
+    }
+function wlan{
+    netsh wlan show profiles
+    $choice = Read-Host "Enter your choice"
+    netsh wlan show profiles $choice key=clear
+}
+function office-setup{
+    aria2c 'https://go.microsoft.com/fwlink/?linkid=2264705&clcid=0x409&culture=en-us&country=us'
+    start-process OfficeSetup.exe
+}
 function pkg ($SoftwareName) {
     Write-Host "Welcome to the Software Installer!" -ForegroundColor Cyan
     # Prompt for package manager selection
@@ -339,8 +487,7 @@ function pkg ($SoftwareName) {
     Write-Host "[ch] - choco"
     Write-Host "[sc] - scoop"
     Write-Host " "
-    $choice = Read-Host Enter the number of your choice:
-    Write-Host " "
+    $choice = Read-Host Enter your choice:
     switch ($choice) {
         wi {
             Write-Host "Installing $SoftwareName using winget..." -ForegroundColor Green
@@ -357,100 +504,44 @@ function pkg ($SoftwareName) {
         default {
             Write-Host "Invalid choice." -ForegroundColor Red
         }
-    }
-    }
-function search ($appname) {
-    winget search --query $appname | fzf
-    }
-# Choco
-    $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-    if (Test-Path($ChocolateyProfile)) {
-    Import-Module "$ChocolateyProfile"
-    }
-# Help Function
-function Show-Help {
-    @"
-PowerShell Profile Help
-=======================
+}
+}
+function cl ($url){
+    cd D:
+    git clone $url
+}
+function explore{
+    $location= Get-location
+    explorer $location
+}
+function Hash{
+    explorer "D:\HashTWM\hashtwm.exe"
+}
+Function Komorebi-start{
+    komorebic start --whkd --bar
+}
+Function Musics{
+    cd "D:\musics"
+}
+Function Search ($SearchFor){
+$Query = "http://www.bing.com/search?q=$SearchFor"
+Start $Query
+}
+function previewer{
+    fzf --preview 'C:\Users\Himadri\Downloads\ABDM\bat-v0.24.0-x86_64-pc-windows-msvc\bat.exe {}' --height 60% --layout reverse --border 
+}
+function ex ($dir){
+    explorer $dir
+}
+function redit{
+    # Get all registry keys under HKLM and HKCU
+$registryKeys = Get-ChildItem -Path HKLM:\, HKCU:\ -Recurse | Select-Object -ExpandProperty PSPath
 
-Update-Profile - Checks for profile updates from a remote repository and updates if necessary.
+# Filter registry keys using fzf
+$selectedKey = $registryKeys | Invoke-Fzf
 
-Update-PowerShell - Checks for the latest PowerShell release and updates if a new version is available.
-
-Edit-Profile - Opens the current user's profile for editing using the configured editor.
-
-touch <file> - Creates a new empty file.
-
-ff <name> - Finds files recursively with the specified name.
-
-Get-PubIP - Retrieves the public IP address of the machine.
-
-winutil - Runs the WinUtil script from Chris Titus Tech.
-
-uptime - Displays the system uptime.
-
-reload - Reloads the current user's PowerShell.
-
-unzip <file> - Extracts a zip file to the current directory.
-
-hb <file> - Uploads the specified file's content to a hastebin-like service and returns the URL.
-
-grep <regex> [dir] - Searches for a regex pattern in files within the specified directory or from the pipeline input.
-
-df - Displays information about volumes.
-
-sed <file> <find> <replace> - Replaces text in a file.
-
-which <name> - Shows the path of the command.
-
-export <name> <value> - Sets an environment variable.
-
-pkill <name> - Kills processes by name.
-
-pgrep <name> - Lists processes by name.
-
-head <path> [n] - Displays the first n lines of a file (default 10).
-
-tail <path> [n] - Displays the last n lines of a file (default 10).
-
-nf <name> - Creates a new file with the specified name.
-
-mkcd <dir> - Creates and changes to a new directory.
-
-docs - Changes the current directory to the user's Documents folder.
-
-dtop - Changes the current directory to the user's Desktop folder.
-
-ep - Opens the profile for editing.
-
-k9 <name> - Kills a process by name.
-
-la - Lists all files in the current directory with detailed formatting.
-
-ll - Lists all files, including hidden, in the current directory with detailed formatting.
-
-gs - Shortcut for 'git status'.
-
-ga - Shortcut for 'git add .'.
-
-gc <message> - Shortcut for 'git commit -m'.
-
-gp - Shortcut for 'git push'.
-
-g - Changes to the GitHub directory.
-
-gcom <message> - Adds all changes and commits with the specified message.
-
-lazyg <message> - Adds all changes, commits with the specified message, and pushes to the remote repository.
-
-sysinfo - Displays detailed system information.
-
-flushdns - Clears the DNS cache.
-
-cpy <text> - Copies the specified text to the clipboard.
-
-pst - Retrieves text from the clipboard.
-
-Use 'Show-Help' to display this help message.
-"@
+# Open the selected key in RegEdit
+if ($selectedKey) {
+    Start-Process regedit.exe -ArgumentList $selectedKey
+}
 }
